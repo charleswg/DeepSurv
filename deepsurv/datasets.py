@@ -4,7 +4,7 @@ import numpy as np
 class SimulatedData:
     def __init__(self, hr_ratio,
         average_death = 5, end_time = 15,
-        num_features = 10, num_var = 2,
+        num_features = 10, censor_p = 0.1, num_var = 2,
         treatment_group = False):
         """
         Factory class for producing simulated survival data.
@@ -32,6 +32,7 @@ class SimulatedData:
         self.treatment_group = treatment_group
         self.m = int(num_features) + int(treatment_group)
         self.num_var = num_var
+        self.censor_p = censor_p
 
     def _linear_H(self,x):
         """
@@ -106,7 +107,7 @@ class SimulatedData:
 
         if self.treatment_group:
             data[:,-1] = np.squeeze(np.random.randint(0,2,(N,1)))
-            print(data[:,-1])
+            print data[:,-1]
 
         # Each patient has a uniform death probability
         p_death = self.average_death * np.ones((N,1))
@@ -129,7 +130,7 @@ class SimulatedData:
         # Generate time of death for each patient
         # currently exponential random variable
         death_time = np.zeros((N,1))
-        for i in range(N):
+        for i in xrange(N):
             if self.treatment_group and data[i,-1] == 0:
                 death_time[i] = np.random.exponential(p_death[i])
             else:
@@ -137,8 +138,13 @@ class SimulatedData:
 
         # Censor anything that is past end time
         censoring = np.ones((N,1))
+
         death_time[death_time > self.end_time] = self.end_time
         censoring[death_time == self.end_time] = 0
+
+        censoring_flag=np.random.rand(N,1)
+        censoring[censoring_flag<=np.percentile(censoring_flag,self.censor_p*100)]=0
+
 
         # Flatten Arrays to Vectors
         death_time = np.squeeze(death_time)
