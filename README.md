@@ -21,6 +21,7 @@ You can install *DeepSurv* using
 	pip install deepsurv
 	pip install --upgrade https://github.com/Theano/Theano/archive/master.zip
 	pip install --upgrade https://github.com/Lasagne/Lasagne/archive/master.zip
+	pip install matplotlib
 
 
 from the command line.
